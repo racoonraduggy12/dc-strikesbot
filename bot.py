@@ -6,8 +6,8 @@ import os
 TOKEN = ""
 
 intents = discord.Intents.default()
-intents.members = True
-
+intents.members = True       # For getting member info
+intents.message_content = True  # THIS is required for reading !commands
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 STRIKES_FILE = "strikes.json"
@@ -31,7 +31,7 @@ async def on_ready():
 
 
 @bot.command()
-@commands.has_permissions(manage_messages=True)
+@commands.has_permissions(manage_nicknames=True)
 async def strike(ctx, member: discord.Member, *, reason="No reason provided"):
     strikes = load_strikes()
     user_id = str(member.id)
@@ -55,7 +55,7 @@ async def strikes(ctx, member: discord.Member):
 
 
 @bot.command()
-@commands.has_permissions(manage_messages=True)
+@commands.has_permissions(manage_nicknames=True)
 async def removestrike(ctx, member: discord.Member):
     strikes = load_strikes()
     user_id = str(member.id)
@@ -73,3 +73,4 @@ async def removestrike(ctx, member: discord.Member):
 
 
 bot.run(TOKEN)
+
