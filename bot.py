@@ -35,12 +35,13 @@ async def on_ready():
 async def strike(ctx, member: discord.Member, *, reason="No reason provided"):
     strikes = load_strikes()
     user_id = str(member.id)
-
-    strikes[user_id] = strikes.get(user_id, 0) + 1
+    if user_id not in strikes:
+        strikes[user_id] = []
+    strikes[user_id].append(reason)
     save_strikes(strikes)
 
     await ctx.send(
-        f"⚠️ **{member.name}** now has **{strikes[user_id]}** strike(s).\n"
+        f"⚠️ **{member.name}** now has **{len(strikes[user_id])}** strike(s) \n"
         f"Reason: {reason}"
     )
 
@@ -49,9 +50,10 @@ async def strike(ctx, member: discord.Member, *, reason="No reason provided"):
 async def strikes(ctx, member: discord.Member):
     strikes = load_strikes()
     user_id = str(member.id)
-
-    count = strikes.get(user_id, 0)
-    await ctx.send(f"📊 **{member.name}** has **{count}** strike(s).")
+    if user_id not in strikes:
+        strikes[user_id] = []
+    count = len(strikes[user_id])
+    await ctx.send(f"📊 **{member.name}** has **{count}** strike(s) for: {', '.join(strikes[user_id])}.\n")
 
 
 @bot.command()
@@ -60,17 +62,15 @@ async def removestrike(ctx, member: discord.Member):
     strikes = load_strikes()
     user_id = str(member.id)
 
-    if user_id not in strikes or strikes[user_id] == 0:
+    if user_id not in strikes or len(strikes[user_id]) == 0:
         await ctx.send(f"{member.name} has no strikes.")
         return
-
-    strikes[user_id] -= 1
+    strikes[user_id].pop()
     save_strikes(strikes)
 
     await ctx.send(
-        f"✅ Removed a strike. **{member.name}** now has **{strikes[user_id]}** strike(s)."
+        f"✅ Removed a strike. **{member.name}** now has **{len(strikes[user_id])}** strike(s) for: {', '.join(strikes[user_id])}.\n"
     )
 
 
 bot.run(TOKEN)
-
